@@ -1,0 +1,107 @@
+# Hydraulic Modeling Module Requirements
+
+Let's design the requirements for the hydraulic modeling module of your Streamlit prototype app. We'll keep it simple enough to build in a few days but still technically meaningful.
+
+## 🎯 Objective
+
+To simulate steady-state liquid flow in a pipeline and compute:
+
+- Pressure drop across the pipeline
+- Required pump power
+- Energy consumption over time
+- (Optional) Estimate of GHG emissions
+
+## ✅ Inputs (User-defined Parameters)
+
+Organize inputs into Pipeline Parameters, Fluid Properties, and Operating Conditions:
+
+### 🔧 Pipeline Parameters
+
+| Name           | Type  | Units        | Description                                                      |
+|----------------|-------|--------------|------------------------------------------------------------------|
+| Length         | float | km or m      | Total pipeline length                                            |
+| Diameter       | float | inches or mm | Internal diameter of the pipe                                    |
+| Roughness      | float | mm or ε      | Absolute pipe roughness (e.g., 0.045 mm for commercial steel)    |
+| Elevation Gain | float | m            | Net elevation difference from inlet to outlet (positive for uphill) |
+
+### 🛢️ Fluid Properties
+
+| Name         | Type  | Units   | Description                                       |
+|--------------|-------|---------|---------------------------------------------------|
+| Density (ρ)  | float | kg/m³   | For crude oil, often around 850–950 kg/m³         |
+| Viscosity (μ)| float | Pa·s    | Dynamic viscosity, e.g., 0.1 Pa·s for oil         |
+
+### ⚙️ Operating Conditions
+
+| Name            | Type  | Units          | Description                                                      |
+|-----------------|-------|----------------|------------------------------------------------------------------|
+| Flow Rate       | float | m³/s or bbl/day| Volumetric flow rate of the fluid                                |
+| Pump Efficiency | float | % (0–100)      | Efficiency of the pump used (optional but useful for power calc) |
+
+## 📈 Outputs
+
+### 🔹 1. Pressure Drop (ΔP)
+
+Units: Pa or bar
+
+Calculated using Darcy-Weisbach equation:
+
+\[ \Delta P = f \cdot \frac{L}{D} \cdot \frac{\rho v^2}{2} \]
+
+where:
+
+- \( f \) = friction factor (via Moody or approximate with Swamee-Jain)
+- \( L \) = pipeline length (m)
+- \( D \) = diameter (m)
+- \( \rho \) = fluid density (kg/m³)
+- \( v \) = velocity (from flow rate)
+
+### 🔹 2. Required Pump Power
+
+Units: kW
+
+Formula:
+
+\[ P = \frac{Q \cdot \Delta P}{\eta} \]
+
+where:
+
+- \( Q \) = flow rate (m³/s)
+- \( \Delta P \) = pressure drop (Pa)
+- \( \eta \) = pump efficiency (as decimal)
+
+### 🔹 3. Energy Consumption (optional)
+
+Units: kWh per day
+
+Formula:
+
+\[ E = P \cdot t \]
+
+where \( t \) is the duration (e.g., 24h)
+
+### 🔹 4. GHG Emissions (optional)
+
+Units: kg CO₂e
+
+Based on energy use and emission factor:
+
+\[ \text{Emissions} = \text{Energy (kWh)} \times \text{Emission factor (kg CO₂/kWh)} \]
+
+Use standard value, e.g., 0.5 kg CO₂/kWh
+
+## 📊 Suggested UI Components in Streamlit
+
+| Component               | Purpose                                 |
+|-------------------------|-----------------------------------------|
+| Sliders and number inputs | For entering parameters                 |
+| Line plot               | Pressure profile along the pipeline     |
+| Bar chart or gauges     | Power and energy comparison             |
+| Markdown/latex blocks   | For showing formulas and explanations |
+
+## 🧪 Bonus Features (if time allows)
+
+- Include a choice between crude oil and water, with prefilled properties
+- Add preset "example scenarios" (e.g., short pipe, long pipe, high viscosity)
+- Allow real-time recomputation when sliders are changed
+- Export output as PDF report or CSV
